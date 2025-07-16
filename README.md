@@ -1,158 +1,175 @@
-# ⚙️ Watsonx Orchestrate DevKit Installer
+# 🤖 IBM Consulting – AI‑ Recruitment & Tender Matching Suite  
+*A watsonx Orchestrate reference solution & developer kit*
 
-> A streamlined, Makefile-driven installer that automatically sets up a complete local development environment for **IBM watsonx Orchestrate** on macOS and Ubuntu.
+[![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue)]() 
+[![License Apache‑2.0](https://img.shields.io/badge/license-Apache%202.0-blue)]()
 
-[](https://www.google.com/search?q=)
-[![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue)]()
-[![License Apache-2.0](https://img.shields.io/badge/license-Apache%202.0-blue)]()
+> End‑to‑end agentic AI that ingests CVs and _Bandi di Gara_ (client tenders), structures the data, and ranks the best‑fit candidates for every project—all deployable , which ships inside this repository.
 
------
+---
 
------
+## 🗺️ Table of Contents
+1. [Solution Overview](#solution-overview)  
+2. [Key Features](#key-features)  
+3. [System Architecture](#system-architecture)  
+4. [Core Agents](#core-agents)  
+5. [Quick Start](#quick-start)  
+6. [Makefile Command Reference](#makefile-command-reference)  
+7. [Folder Layout](#folder-layout)  
+8. [Contributing](#contributing)  
+9. [License](#license)  
 
-## 🚀 Features
+---
 
-  * **Automated OS Detection**: Intelligently identifies your operating system (macOS or Ubuntu) to run the correct setup scripts.
-  * **One-Command Setup**: A single `make install` command orchestrates the entire installation process.
-  * **Prerequisite Installation**: Automatically installs essential tools if they are missing:
-      * **Python 3.11**: Ensures the correct Python version is available for the ADK.
-      * **Docker & Docker Compose**: Installs and configures the containerization tools required by watsonx Orchestrate.
-  * **Isolated Python Environment**: Creates a local Python virtual environment (`venv`) to keep dependencies clean and project-specific.
-  * **Orchestrate ADK Installation**: Prompts for and installs your desired version of the `ibm-watsonx-orchestrate` ADK into the virtual environment.
-  * **Environment Configuration**: Seamlessly integrates with a `.env` file for secure management of your API keys and credentials.
-  * **Simple Makefile Workflow**: Provides clear, high-level commands for installation, running, and cleanup, with a self-documenting `help` target.
+## Solution Overview
 
------
+Recruiters spend countless hours parsing résumés and matching them to client requirements.  
+This project delivers a **four‑layer watsonx Orchestrate solution** that:
 
-## 🏁 Getting Started
+* **Automatically** extracts structured data from any CV or _Bando di Gara_ document.  
+* **Continuously** evaluates candidate ↔ project fit using a transparent scoring rubric.  
+* **Stores** every decision in JSON for auditability & analytics.  
+* **Runs anywhere**—Mac, Ubuntu, or CI—thanks to the included **Watsonx Orchestrate DevKit Installer**.
 
-Follow these steps to get your local watsonx Orchestrate development environment up and running in minutes.
+---
 
-### 1\. Prerequisites
+## Key Features
+| Area | Highlights |
+|------|------------|
+| **Document Ingestion** | Drag‑and‑drop CVs / tenders; auto‑type detection; real‑time status feedback. |
+| **Data Extraction** | Llama‑3‑powered _Processor_ agent outputs strict JSON schemas for CVs & tenders. |
+| **Smart Matching** | _Simple Evaluator_ agent scores 0‑100 with qualitative labels (Excellent → Poor). |
+| **Explainability** | Each score includes a 1‑2 sentence rationale & is persisted with an evaluation ID. |
+| **Developer UX** | One‑command local stack via the bundled installer. |
 
-Ensure you have the following tools installed on your system:
+---
+## System Architecture
 
-  * **Git**: To clone the repository.
-  * **Make**: To run the installation commands. This is pre-installed on most macOS and Linux systems.
+```mermaid
+flowchart TD
+    %% AI-Driven Recruitment & Tender Matching Suite – Architecture
 
-### 2\. Clone the Repository
+    subgraph Presentation_Layer["Presentation Layer"]
+        style Presentation_Layer fill:#f4f6f8,stroke:#c6c9cc,stroke-width:1px
+        UI["Recruiter / Manager UI<br/>Watsonx Orchestrate"]
+    end
 
-Open your terminal and clone this repository to your local machine.
+    subgraph Orchestration_Layer["Ingestion & Orchestration"]
+        style Orchestration_Layer fill:#f0f9ff,stroke:#7aa9e6,stroke-width:1px
+        RM["Recruitment Manager<br/>(react agent)"]
+    end
+
+    subgraph Extraction_Layer["Extraction & Structuring"]
+        style Extraction_Layer fill:#fff9ef,stroke:#f4b860,stroke-width:1px
+        P["Processor<br/>(planner agent)"]
+    end
+
+    subgraph Knowledge_Base["Knowledge Base"]
+        style Knowledge_Base fill:#ecfdf5,stroke:#34d399,stroke-width:1px
+        DB[(Recruitment Database<br/> & Vector Store)]
+    end
+
+    subgraph Analysis_Layer["Analysis & Decisioning"]
+        style Analysis_Layer fill:#fdf2f8,stroke:#f472b6,stroke-width:1px
+        RA["Recruitment Analyzer<br/>(default)"]
+        SE["Simple Evaluator<br/>(default)"]
+    end
+
+    %% Flows
+    UI -->|Upload CV / Bando| RM
+    RM -->|Route file| P
+    P -->|JSON schema| RM
+    RM -->|Validated data| DB
+
+    UI -->|Analyze request| RA
+    UI -->|Evaluate request| SE
+
+    RA -->|get_candidate_info / get_bando_info| DB
+    SE -->|get_comparison_data| DB
+    SE -->|save_evaluation_result| DB
+
+    DB -->|Eval history & records| UI
+
+    %% Demo link
+    click UI "http://localhost:3000/chat-lite" _blank
+```
+
+
+
+* **Recruitment Manager** – detects uploads, routes to Processor, saves to DB.  
+* **Processor** – per‑file extraction to strict schema (`CV` or `Bando di Gara`).  
+* **Recruitment Analyzer** – one‑item deep‑dive summariser.  
+* **Simple Evaluator** – candidate/project scoring & persistence.
+
+---
+
+## Core Agents
+
+| Agent | Purpose | Key Tools |
+|-------|---------|-----------|
+| **Recruitment Manager** | Orchestrates document flow & DB writes. | `format_and_save_processed_data`, retrieval helpers |
+| **Processor** | LLM‑based information extractor (CV / Bando). | — |
+| **Recruitment Analyzer** | Detailed single‑item insights. | `get_candidate_info`, `get_bando_info` |
+| **Simple Evaluator** | Generates 0‑100 match score + rationale, stores result. | `get_comparison_data`, `save_evaluation_result`, `get_evaluation_results` |
+
+---
+
+## Quick Start
 
 ```bash
-git clone https://github.com/ruslanmv/Installer-Watsonx-Orchestrate.git
-cd Installer-Watsonx-Orchestrate
-```
+# 1. Clone
+git clone https://github.com/ruslanmv/ai-recruitment-suite.git
+cd ai-recruitment-suite
 
-### 3\. Configure Your Environment
+# 2. Copy .env.example → .env and fill credentials
 
-The installer requires a `.env` file in the project root to configure your IBM credentials.
-
-**A.** Create a file named `.env` in the `Installer-Watsonx-Orchestrate` directory.
-
-**B.** Copy one of the templates below into your `.env` file, depending on your account type.
-
-**Template for a watsonx Orchestrate Account:**
-
-```env
-# For watsonx Orchestrate (SaaS) accounts
-WO_DEVELOPER_EDITION_SOURCE=orchestrate
-WO_INSTANCE=https://api.us-east.watson-orchestrate.ibm.com/instances/your-instance-id
-WO_API_KEY=your-orchestrate-api-key
-```
-
-**Template for a watsonx.ai Account:**
-
-```env
-# For watsonx.ai (BYOA) accounts on IBM Cloud
-WO_DEVELOPER_EDITION_SOURCE=myibm
-WO_ENTITLEMENT_KEY=your-entitlement-key
-WATSONX_APIKEY=your-watsonx-api-key
-WATSONX_SPACE_ID=your-watsonx.ai-space-id
-```
-
-**C.** Replace the placeholder values (`your-...`) with your actual credentials.
-
-### 4\. Run the Installer
-
-With your `.env` file configured, run the main installation command from the project root.
-
-```bash
+# 3. Install & run (DevKit installer is already included)
 make install
+make start          # backend
+make run            # import agents, start UI
+
+# Open the chat UI
+open http://localhost:3000/chat-lite
+````
+
+---
+
+## Makefile Command Reference
+
+| Command        | Description                                              |
+| -------------- | -------------------------------------------------------- |
+| `make install` | ⚙️ Sets up prerequisites, virtual env, ADK (via DevKit). |
+| `make start`   | 🚀 Starts the watsonx Orchestrate stack.                 |
+| `make run`     | 🏃 Imports all tools & agents, then prompts to open UI.  |
+| `make stop`    | 🛑 Stops the server & containers.                        |
+| `make purge`   | 🔥 Removes all containers & images.                      |
+| `make help`    | ℹ️ Shows command list.                                   |
+
+---
+
+## Folder Layout
+
+```
+ai-recruitment-suite/
+├─ agents/            # .yaml agent specs (imported by make run)
+├─ tools/             # Custom tool Python or OpenAPI files
+├─ docker/            # Docker‑compose + service configs
+├─ watsonx-orchestrate/            # ⚙️ DevKit Installer scripts (included)
+├─ Makefile           # Command runner
+├─ README.md
+└─ .env.example
 ```
 
-The script will detect your OS, install any missing prerequisites, and guide you through selecting an ADK version. This process may take several minutes.
+---
 
------
+## Contributing
 
-## 🛠️ Usage Workflow
+PRs are welcome!
+Please open an issue first to discuss major changes.
 
-Once the installation is complete, your environment is ready. The `Makefile` provides a simple workflow for starting, managing, and stopping your environment.
+---
 
-### 1\. Activate the Virtual Environment
+## License
 
-Before running any commands, you **must** activate the isolated Python environment. This only needs to be done once per terminal session.
+Apache 2.0 – see [LICENSE](LICENSE) for details.
 
-```bash
-source venv/bin/activate
-```
-
-> You can confirm it's active by seeing `(venv)` at the beginning of your terminal prompt.
-
-### 2\. Start the Server
-
-Start the watsonx Orchestrate server in the background.
-
-```bash
-make start
-```
-
-### 3\. Add and Import Your Skills
-
-Place your custom tool (Python or OpenAPI YAML files) and agent (`.yaml`) files into the `/tools` and `/agents` directories, respectively. If these directories do not exist, the import step will be skipped.
-
-Once your files are in place, run:
-
-```bash
-make run
-```
-
-This command automatically finds and imports all your tools and agents, and will prompt you to start the chat UI, and finally wait and then you can enter to your local WatsonX orchestrate.
-[http://localhost:3000/chat-lite](http://localhost:3000/chat-lite)
-
-### 4\. Stop the Server
-
-To stop the server and any related Docker containers without removing them, use:
-
-```bash
-make stop
-```
-
-### 5\. Full Cleanup (Optional)
-
-To stop and completely remove all containers and Docker images from your host, use the purge command. **Warning**: This is a destructive action and will require you to re-download images later.
-
-```bash
-make purge
-```
-
------
-
-## Available Commands
-
-This project uses a `Makefile` as a simple command runner. Run `make help` to see this list in your terminal.
-
-| Command | Description |
-| :------------- | :--------------------------------------------------------------------------------- |
-| `make install` | ⚙️ Installs the complete environment, including prerequisites and the ADK. |
-| `make start` | 🚀 Starts the watsonx Orchestrate server in the background. |
-| `make run` | 🏃 Imports all tools and agents from the `/tools` and `/agents` directories. |
-| `make stop` | 🛑 Stops the watsonx Orchestrate server and any related containers. |
-| `make purge` | 🔥 Stops and completely removes all containers and Docker images from the host. |
-| `make help` | ℹ️ Shows this list of all available commands. |
-
------
-
-## 📜 License
-
-This project is licensed under the **Apache 2.0 License**.

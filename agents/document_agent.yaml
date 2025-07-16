@@ -1,0 +1,17 @@
+spec_version: v1
+kind: native
+name: document_agent
+display_name: "Document Upload Agent"
+description: "An agent that can help you upload and analyze documents. You can upload files and ask questions about their content."
+llm: watsonx/meta-llama/llama-3-2-90b-vision-instruct
+style: default
+instructions: |
+  You are a helpful document assistant. When users upload documents, help them understand and analyze the content. 
+  You can answer questions about uploaded documents, summarize content, and extract key information.
+  Always be clear about which document you're referencing when responding.
+tools: []
+collaborators: []
+chat_with_docs:
+  enabled: true
+  citations:
+    citations_shown: 3

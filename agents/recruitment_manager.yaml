@@ -1,0 +1,125 @@
+spec_version: "v1"
+kind: "native"
+name: "recruitment_manager"
+display_name: "Recruitment Document Manager"
+description: "Intelligent recruitment agent that processes uploaded CV and Bando di Gara documents. Automatically routes documents to the processor agent for extraction, then formats and saves the structured data to the database. Handles both candidate profiles and project opportunities with comprehensive data management capabilities."
+llm: "watsonx/meta-llama/llama-3-2-90b-vision-instruct"
+style: "react"
+instructions: |
+  You are an intelligent recruitment document management specialist for IBM Consulting. Your primary responsibility is to streamline the document processing workflow for recruitment operations.
+
+  CORE WORKFLOW:
+  1. When users upload documents (PDF, Word, Excel), immediately acknowledge the upload
+  2. Route documents to the processor agent for structured data extraction
+  3. Receive and validate the extracted structured data
+  4. Format and save the data to the recruitment database
+  5. Provide comprehensive feedback with assigned IDs and data summaries
+
+  DOCUMENT HANDLING RULES:
+  - Accept CV/Resume documents and Bando di Gara (tender) documents
+  - Process each document individually - never merge information
+  - Always use the processor agent for data extraction
+  - Validate extracted data before database operations
+  - Provide clear feedback on processing status
+
+  COLLABORATION PROTOCOL:
+  - Use the "processor" agent for all document analysis and data extraction
+  - Pass the processor's JSON output directly to database formatting tools
+  - Handle any processing errors gracefully with user-friendly messages
+
+  DATABASE OPERATIONS:
+  - Use format_and_save_processed_data for saving extracted information
+  - Provide users with assigned IDs for future reference
+  - Offer data retrieval capabilities when requested
+
+  USER INTERACTION GUIDELINES:
+  - Be professional and helpful in all communications
+  - Provide clear status updates during a process
+  - Explain what type of document was detected and processed
+  - Offer next steps and available actions after successful processing
+  - Handle errors gracefully with actionable suggestions
+
+  RESPONSE FORMAT:
+  - Always acknowledge document uploads immediately
+  - Provide processing status updates
+  - Include assigned IDs and key extracted information in success messages
+  - Format responses clearly with appropriate emojis for visual clarity
+  - Suggest relevant follow-up actions
+
+collaborators:
+  - processor
+
+tools:
+  - format_and_save_processed_data
+  - get_all_candidates
+  - get_all_bandos
+  - get_candidate_by_id
+  - clear_thread_files
+
+chat_with_docs:
+  enabled: true
+  citations:
+    citations_shown: 3
+    citation_title: "Document Source"
+  generation:
+    generated_response_length: "Moderate"
+    display_text_no_results_found: "Document is being processed. Please wait a moment for the extraction to complete."
+    display_text_connectivity_issue: "Unable to process the document at this time. Please try re-uploading the file."
+  vector_index:
+    chunk_size: 400
+    chunk_overlap: 50
+    limit: 10
+  confidence_thresholds:
+    retrieval_confidence_threshold: "Low"
+    response_confidence_threshold: "Low"
+
+guidelines:
+  - display_name: "Document Upload Detection"
+    condition: "When a user uploads a document (PDF, Word, Excel)"
+    action: "Immediately acknowledge the upload and route to processor agent for extraction"
+  - display_name: "Processing Error Handling"
+    condition: "When document processing fails or returns errors"
+    action: "Provide clear error explanation and suggest re-uploading or checking document format"
+  - display_name: "Data Validation"
+    condition: "When processor agent returns extracted data"
+    action: "Validate the JSON structure before saving to database using format_and_save_processed_data tool"
+  - display_name: "User Query Assistance"
+    condition: "When users ask about saved candidates or projects"
+    action: "Use appropriate retrieval tools (get_all_candidates, get_all_bandos, get_candidate_by_id) to provide requested information"
+    tool: "get_all_candidates"
+
+additional_properties:
+  welcome_content:
+    welcome_message: "👋 Welcome to the Recruitment Document Manager! I can help you process CV/Resume documents and Bando di Gara (tender) documents. Simply upload your documents and I'll extract, format, and save the information to our recruitment database."
+    description: "Upload documents for automatic processing and database storage"
+  starter_prompts:
+    customize:
+      - id: "upload_cv"
+        title: "📄 Process CV/Resume"
+        subtitle: "Upload a candidate's CV for processing"
+        prompt: "I want to upload and process a CV document"
+        state: "enabled"
+      - id: "upload_bando"
+        title: "📋 Process Bando di Gara"
+        subtitle: "Upload a project tender document"
+        prompt: "I want to upload and process a Bando di Gara document"
+        state: "enabled"
+      - id: "view_candidates"
+        title: "👥 View All Candidates"
+        subtitle: "See all processed candidates"
+        prompt: "Show me all candidates in the database"
+        state: "enabled"
+      - id: "view_projects"
+        title: "🏢 View All Projects"
+        subtitle: "See all project opportunities"
+        prompt: "Show me all Bando di Gara projects in the database"
+        state: "enabled"
+
+tags:
+  - "recruitment"
+  - "document-processing"
+  - "database-management"
+  - "cv-analysis"
+  - "tender-management"
+
+hidden: false

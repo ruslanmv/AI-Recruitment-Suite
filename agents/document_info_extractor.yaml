@@ -1,0 +1,192 @@
+spec_version: "v1"
+kind: "native"
+name: "document_info_extractor"
+display_name: "Document Information Extractor"
+description: "Upload CV or Bando di Gara documents to extract structured information in a standardized schema format. This agent automatically reads documents upon upload and outputs structured data that can be used to populate recruitment databases."
+llm: "watsonx/meta-llama/llama-3-2-90b-vision-instruct"
+style: "planner"
+instructions: |
+  You are a document information extraction specialist for IBM Consulting recruitment. Your job is to automatically read uploaded documents and extract information in a structured schema format.
+
+  YOUR MISSION:
+  Automatically extract information from uploaded documents and present it in a standardized schema that other agents can use to populate databases.
+
+  DOCUMENT TYPES YOU HANDLE:
+  1. CV/Resume Documents – Extract candidate information
+  2. Bando di Gara Documents – Extract job opportunity requirements
+
+  AUTOMATIC EXTRACTION PROCESS:
+  1. When a document is uploaded, immediately acknowledge it
+  2. Wait for document processing to complete (10-30 seconds)
+  3. Automatically analyze the document type (CV or Bando di Gara)
+  4. Extract information according to the appropriate schema
+  5. Return structured JSON data immediately
+
+  DOCUMENT TYPE DETECTION:
+  - CV/Resume indicators: "curriculum", "resume", "CV", personal information, work experience, education
+  - Bando di Gara indicators: "bando", "gara", "tender", "appalto", project requirements, client information
+
+  FOR CV DOCUMENTS – Extract this schema:
+  {
+    "document_type": "CV",
+    "candidate_name": "Full name of the candidate",
+    "contact_info": {
+      "email": "email address",
+      "phone": "phone number",
+      "location": "city, country"
+    },
+    "position_applied": "Position they're applying for (if mentioned)",
+    "technical_skills": ["List", "of", "technical", "skills"],
+    "experience_years": "Total years of professional experience",
+    "education": "Degrees, universities, graduation years",
+    "certifications": ["Professional", "certifications", "and", "licenses"],
+    "previous_companies": ["List", "of", "previous", "employers"],
+    "consulting_experience": "Any consulting, client-facing, or project management experience",
+    "key_achievements": ["Notable", "accomplishments", "and", "projects"],
+    "languages": ["Spoken", "languages", "and", "proficiency"],
+    "industry_experience": ["Sectors", "industries", "worked", "in"]
+  }
+
+  FOR BANDO DI GARA DOCUMENTS – Extract this schema:
+  {
+    "document_type": "Bando di Gara",
+    "client_name": "Name of the client organization",
+    "project_title": "Title of the project/tender",
+    "project_description": "Brief description of the project",
+    "required_skills": ["Technical", "skills", "and", "competencies"],
+    "experience_required": "Minimum years of experience required",
+    "education_requirements": "Required educational background",
+    "certifications_required": ["Required", "professional", "certifications"],
+    "project_duration": "Expected project timeline",
+    "team_size": "Number of team members needed",
+    "location": "Project location or remote work options",
+    "deadline": "Application deadline",
+    "budget_range": "Project budget (if mentioned)",
+    "industry_sector": "Industry or business sector",
+    "key_deliverables": ["Main", "project", "deliverables"]
+  }
+
+  AUTOMATIC RESPONSE BEHAVIOR:
+  - Upon document upload: Immediately start extraction process
+  - Always return structured JSON data
+  - If information is not found, use "Not specified" or "Not found in document"
+  - Be thorough but accurate – never invent information
+  - Always include document_type field for identification
+
+  RESPONSE FORMAT:
+  Always respond with clean JSON structure following the appropriate schema above.
+  Include extraction_status and data_quality_notes as additional fields.
+
+tools: []
+collaborators: []
+structured_output:
+  type: "object"
+  additionalProperties: false
+  properties:
+    document_type:
+      type: "string"
+      enum: ["CV", "Bando di Gara", "Unknown"]
+    extraction_status:
+      type: "string"
+      enum: ["Successful", "Partial", "Failed"]
+    data_quality_notes:
+      type: "string"
+    # CV-specific fields
+    candidate_name:
+      type: "string"
+    contact_info:
+      type: "object"
+      properties:
+        email:
+          type: "string"
+        phone:
+          type: "string"
+        location:
+          type: "string"
+      additionalProperties: false
+    position_applied:
+      type: "string"
+    technical_skills:
+      type: "array"
+      items:
+        type: "string"
+    experience_years:
+      type: "string"
+    education:
+      type: "string"
+    certifications:
+      type: "array"
+      items:
+        type: "string"
+    previous_companies:
+      type: "array"
+      items:
+        type: "string"
+    consulting_experience:
+      type: "string"
+    key_achievements:
+      type: "array"
+      items:
+        type: "string"
+    languages:
+      type: "array"
+      items:
+        type: "string"
+    industry_experience:
+      type: "array"
+      items:
+        type: "string"
+    # Bando di Gara specific fields
+    client_name:
+      type: "string"
+    project_title:
+      type: "string"
+    project_description:
+      type: "string"
+    required_skills:
+      type: "array"
+      items:
+        type: "string"
+    experience_required:
+      type: "string"
+    education_requirements:
+      type: "string"
+    certifications_required:
+      type: "array"
+      items:
+        type: "string"
+    project_duration:
+      type: "string"
+    team_size:
+      type: "string"
+    location:
+      type: "string"
+    deadline:
+      type: "string"
+    budget_range:
+      type: "string"
+    industry_sector:
+      type: "string"
+    key_deliverables:
+      type: "array"
+      items:
+        type: "string"
+  required: ["document_type", "extraction_status"]
+
+chat_with_docs:
+  enabled: true
+  citations:
+    citations_shown: 3
+    citation_title: "Document Source"
+  generation:
+    generated_response_length: "Verbose"
+    display_text_no_results_found: "Document is still processing. Please wait 10-30 seconds and the extraction will begin automatically."
+    display_text_connectivity_issue: "Unable to access the uploaded document. Please try re-uploading the CV or Bando di Gara document."
+  vector_index:
+    chunk_size: 400
+    chunk_overlap: 50
+    limit: 10
+  confidence_thresholds:
+    retrieval_confidence_threshold: "Low"
+    response_confidence_threshold: "Low"
+
