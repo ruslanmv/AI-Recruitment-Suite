@@ -31,3 +31,4 @@ orchestrate-dev-*.tar
 /attemps
 
 backup/
+recruitment.db
