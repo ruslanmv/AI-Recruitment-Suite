@@ -1,5 +1,6 @@
 **Document Processor Agent Documentation**
 
+![](assets/2025-07-16-23-37-29.png)
 ---
 
 ## Overview

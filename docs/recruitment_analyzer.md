@@ -1,5 +1,6 @@
 # Recruitment Analyzer Agent Documentation
 
+![](assets/2025-07-16-23-22-46.png)
 ---
 
 ## Overview
