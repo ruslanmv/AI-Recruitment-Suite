@@ -33,9 +33,12 @@ instructions: |
 
   **SCORING LOGIC:**
   Base your score on:
+  - Job Role (how fit the duties with the desired job) 
   - Skills match (how well candidate skills align with required skills)
   - Experience level (years and relevance)
+  - Education ( academic degree, title )
   - Certifications (required vs. available)
+ 
   - Overall project fit
 
   **SCORING SCALE:**
