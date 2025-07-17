@@ -84,18 +84,24 @@ if ! docker compose version 2>/dev/null | grep -q 'v2\.'; then
 fi
 
 # Config
-ADK_VERSIONS=( "1.6.2" "1.7.0"  )
+ADK_VERSIONS=( 1.6.2" "1.7.0" ) # Updated list for July 2025
 ENV_FILE="${INSTALL_ROOT}/.env"
 VENV_DIR="${INSTALL_ROOT}/venv"
 ADK_VERSION=""
 ACCOUNT_TYPE=""
 
-# Load .env
-[[ -f "$ENV_FILE" ]] || { echo "❌ .env not found at ${ENV_FILE}"; exit 1; }
-set -a
-# shellcheck disable=SC1090
-source "$ENV_FILE"
-set +a
+# --- FIX: Prioritize existing environment variables over the .env file ---
+# This allows the script to run in CI/CD environments where variables are pre-set.
+if [[ -n "${WO_DEVELOPER_EDITION_SOURCE:-}" ]]; then
+    echo "ⓘ Environment variables detected. Skipping .env file load."
+else
+    echo "ⓘ No pre-set environment variables detected. Looking for .env file..."
+    [[ -f "$ENV_FILE" ]] || { echo "❌ .env not found at ${ENV_FILE}. Please create it or set environment variables."; exit 1; }
+    set -a
+    # shellcheck disable=SC1090
+    source "$ENV_FILE"
+    set +a
+fi
 
 # Detect account type
 if [[ "${WO_DEVELOPER_EDITION_SOURCE:-}" == "orchestrate" ]]; then
@@ -103,7 +109,7 @@ if [[ "${WO_DEVELOPER_EDITION_SOURCE:-}" == "orchestrate" ]]; then
 elif [[ "${WO_DEVELOPER_EDITION_SOURCE:-}" == "myibm" ]]; then
   ACCOUNT_TYPE="watsonx.ai"
 else
-  echo "❌ WO_DEVELOPER_EDITION_SOURCE is not set or has an invalid value in .env." >&2
+  echo "❌ WO_DEVELOPER_EDITION_SOURCE is not set or has an invalid value." >&2
   exit 1
 fi
 echo "🔍 Detected account source: ${WO_DEVELOPER_EDITION_SOURCE} (Account Type: ${ACCOUNT_TYPE})"
@@ -111,11 +117,11 @@ echo "🔍 Detected account source: ${WO_DEVELOPER_EDITION_SOURCE} (Account Type
 # Validate required keys
 if [[ "$ACCOUNT_TYPE" == "orchestrate" ]]; then
   for V in WO_DEVELOPER_EDITION_SOURCE WO_INSTANCE WO_API_KEY; do
-    [[ -n "${!V:-}" ]] || { echo "❌ $V is missing in .env for 'orchestrate' source."; exit 1; }
+    [[ -n "${!V:-}" ]] || { echo "❌ $V is missing for 'orchestrate' source."; exit 1; }
   done
 else # watsonx.ai
   for V in WO_DEVELOPER_EDITION_SOURCE WO_ENTITLEMENT_KEY WATSONX_APIKEY WATSONX_SPACE_ID; do
-    [[ -n "${!V:-}" ]] || { echo "❌ $V is missing in .env for 'myibm' source."; exit 1; }
+    [[ -n "${!V:-}" ]] || { echo "❌ $V is missing for 'myibm' source."; exit 1; }
   done
 fi
 
@@ -132,7 +138,6 @@ if [[ -d "$VENV_DIR" ]]; then
       ADK_VERSION=""
   fi
 
-  # --- FIX: Handle non-interactive environments ---
   if [[ -z "$ADK_VERSION" ]]; then
       echo "⚠️  Could not detect installed ADK version in the existing venv."
       if [[ -n "${CI:-}" || ! -t 0 ]]; then
