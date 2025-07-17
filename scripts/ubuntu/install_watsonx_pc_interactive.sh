@@ -40,39 +40,38 @@ EOF
 
 print_logo
 
+# --- FIX: Extracted ADK installation logic into a reusable function ---
+
 install_adk() {
-    # --- FIX: Handle non-interactive environments ---
-    if [[ -n "${CI:-}" || ! -t 0 ]]; then
-        # In non-interactive mode, automatically select the latest version
-        ADK_VERSION="${ADK_VERSIONS[-1]}"
-        echo "ⓘ Non-interactive/CI environment detected. Automatically selecting latest ADK version: ${ADK_VERSION}"
-    else
-        # In interactive mode, prompt the user
-        echo
-        echo "Available ADK versions:"
-        for i in "${!ADK_VERSIONS[@]}"; do
-            printf "   %2d) %s\n" $((i+1)) "${ADK_VERSIONS[$i]}"
-        done
+  echo
+  echo "Available ADK versions:"
+  for i in "${!ADK_VERSIONS[@]}"; do
+    printf "   %2d) %s\n" $((i+1)) "${ADK_VERSIONS[$i]}"
+  done
 
-        local input
-        read -rp "Select ADK version number (1-${#ADK_VERSIONS[@]}) or type version (e.g. ${ADK_VERSIONS[-1]}): " input
+  local input
+  read -rp "Select ADK version number (1-${#ADK_VERSIONS[@]}) or type version (e.g. ${ADK_VERSIONS[-1]}): " input
 
-        # Direct match of a version string?
-        if printf '%s\n' "${ADK_VERSIONS[@]}" | grep -qx -- "$input"; then
-            ADK_VERSION="$input"
-        # Numeric index into the array?
-        elif [[ "$input" =~ ^[0-9]+$ ]] && (( input >= 1 && input <= ${#ADK_VERSIONS[@]} )); then
-            ADK_VERSION="${ADK_VERSIONS[$((input-1))]}"
-        else
-            echo "❌ Invalid selection. No installation performed."
-            ADK_VERSION=""  # clear out on error
-            return
-        fi
-    fi
+  # Direct match of a version string?
+  if printf '%s\n' "${ADK_VERSIONS[@]}" | grep -qx -- "$input"; then
+    ADK_VERSION="$input"
 
-    echo "📦 Installing ibm-watsonx-orchestrate==$ADK_VERSION …"
-    pip install --upgrade "ibm-watsonx-orchestrate==$ADK_VERSION"
+  # Numeric index into the array?
+  elif [[ "$input" =~ ^[0-9]+$ ]] \
+        && (( input >= 1 && input <= ${#ADK_VERSIONS[@]} )); then
+    ADK_VERSION="${ADK_VERSIONS[$((input-1))]}"
+
+  else
+    echo "❌ Invalid selection. No installation performed."
+    ADK_VERSION=""  # clear out on error
+    return
+  fi
+
+  echo "📦 Installing ibm-watsonx-orchestrate==$ADK_VERSION …"
+  pip install --upgrade "ibm-watsonx-orchestrate==$ADK_VERSION"
 }
+
+
 
 # --- Main Script ---
 # Pre-flight: Verify local tooling
@@ -84,7 +83,7 @@ if ! docker compose version 2>/dev/null | grep -q 'v2\.'; then
 fi
 
 # Config
-ADK_VERSIONS=( "1.6.2" "1.7.0"  )
+ADK_VERSIONS=( "1.5.0" "1.5.1" "1.6.0" "1.6.1" "1.6.2" "1.7.0" )
 ENV_FILE="${INSTALL_ROOT}/.env"
 VENV_DIR="${INSTALL_ROOT}/venv"
 ADK_VERSION=""
@@ -132,23 +131,18 @@ if [[ -d "$VENV_DIR" ]]; then
       ADK_VERSION=""
   fi
 
-  # --- FIX: Handle non-interactive environments ---
+  # --- FIX: Prompt to install if ADK is missing ---
   if [[ -z "$ADK_VERSION" ]]; then
       echo "⚠️  Could not detect installed ADK version in the existing venv."
-      if [[ -n "${CI:-}" || ! -t 0 ]]; then
-            echo "ⓘ Non-interactive/CI environment detected. Proceeding with installation."
-            install_adk # Call the installation function directly
-      else
-            read -rp "Do you want to install it now? (y/N) " choice
-            case "$choice" in
-                y|Y )
-                    install_adk # Call the installation function
-                    ;;
-                * )
-                    echo "Skipping installation. The environment may not be complete."
-                    ;;
-            esac
-      fi
+      read -rp "Do you want to install it now? (y/N) " choice
+      case "$choice" in
+        y|Y )
+          install_adk # Call the installation function
+          ;;
+        * )
+          echo "Skipping installation. The environment may not be complete."
+          ;;
+      esac
   fi
 else
   echo "📦 Creating venv in ${VENV_DIR}…"

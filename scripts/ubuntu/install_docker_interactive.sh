@@ -55,10 +55,10 @@ if command -v docker &> /dev/null; then
     print_header "Docker Already Installed"
     print_color "$YELLOW" "Detected: $existing_version"
 
-    # ── FIX: Skip interactive prompt in any non-interactive environment ──
-    # If in CI or any other non-interactive shell (where stdin is not a terminal), exit successfully.
-    if [[ -n "${CI:-}" || ! -t 0 ]]; then
-        print_color "$GREEN" "ⓘ Non-interactive/CI environment detected. Assuming 'no' to reinstall."
+    # ── FIX: Skip interactive prompt in CI environments ────────────────
+    # If we're running under CI (e.g. GitHub Actions), just exit success.
+    if [[ -n "${CI:-}" ]]; then
+        print_color "$GREEN" "ⓘ CI environment detected, skipping Docker installation."
         exit 0
     fi
 
