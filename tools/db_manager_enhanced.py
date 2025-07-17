@@ -27,7 +27,6 @@ def clean_json_string(raw: str) -> str:
     s = re.sub(r",(\s*[}\]])", r"\1", s)
     return s
 
-
 # Initialize database with migration-aware schema updates
 def init_db():
     conn = sqlite3.connect('recruitment.db')
@@ -89,7 +88,6 @@ def init_db():
 
     conn.commit()
     conn.close()
-
 
 # Initialize database on import
 init_db()
@@ -226,7 +224,6 @@ def format_and_save_processed_data(processed_data: str) -> str:
         return "❌ Error: Invalid JSON format in processed data even after cleaning"
     except Exception as e:
         return f"❌ Error formatting and saving data: {str(e)}"
-
 
 # Other tools (get_all_candidates, get_all_bandos, get_candidate_by_id, clear_thread_files) remain unchanged
 
