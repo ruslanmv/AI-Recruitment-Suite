@@ -84,8 +84,16 @@ if ! command -v orchestrate &> /dev/null; then
     exit 1
 fi
 
+
 # --- START THE SERVER ---
 echo -e "${GREEN}🚀 Starting watsonx Orchestrate server...${NC}"
-echo -e "${YELLOW}   Using configuration from: ${ENV_FILE}${NC}"
-# pipe the required acceptance into stdin so it never prompts
-printf "I accept\n" | orchestrate server start --env-file="$ENV_FILE"
+echo -e "${YELLOW}    Using configuration from: ${ENV_FILE}${NC}"
+
+# Use the 'expect' tool to automatically handle the interactive prompt
+/usr/bin/expect -c '
+set timeout -1
+spawn orchestrate server start --env-file='"$ENV_FILE"'
+expect "please enter \\"I accept\\":"
+send "I accept\r"
+expect eof
+'
