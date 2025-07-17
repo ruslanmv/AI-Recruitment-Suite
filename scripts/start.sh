@@ -87,13 +87,5 @@ fi
 
 # --- START THE SERVER ---
 echo -e "${GREEN}🚀 Starting watsonx Orchestrate server...${NC}"
-echo -e "${YELLOW}    Using configuration from: ${ENV_FILE}${NC}"
-
-# Use the 'expect' tool to automatically handle the interactive prompt
-/usr/bin/expect -c '
-set timeout -1
-spawn orchestrate server start --env-file='"$ENV_FILE"'
-expect "please enter \\"I accept\\":"
-send "I accept\r"
-expect eof
-'
+echo -e "${YELLOW}   Using configuration from: ${ENV_FILE}${NC}"
+orchestrate server start --env-file="$ENV_FILE"

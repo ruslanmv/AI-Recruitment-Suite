@@ -9,7 +9,7 @@ on:
 jobs:
   pipeline:
     runs-on: ubuntu-latest
-    environment: "Watsonx Orchestrate"      # ← makes your Environment secrets available here
+    environment: "Watsonx Orchestrate"       # ← makes your Environment secrets available here
     strategy:
       matrix:
         python-version: ["3.11"]
@@ -18,11 +18,11 @@ jobs:
     # 👉 All repository & environment secrets become env vars for every step below
     # ──────────────────────────────────────────────────────────────────────────
     env:
-      WO_DEVELOPER_EDITION_SOURCE:   ${{ secrets.WO_DEVELOPER_EDITION_SOURCE }}
-      WO_ENTITLEMENT_KEY:            ${{ secrets.WO_ENTITLEMENT_KEY }}
-      WATSONX_APIKEY:                ${{ secrets.WATSONX_APIKEY }}
-      WATSONX_SPACE_ID:              ${{ secrets.WATSONX_SPACE_ID }}
-      WO_DEVELOPER_EDITION_SKIP_LOGIN: ${{ secrets.WO_DEVELOPER_EDITION_SKIP_LOGIN }}
+      WO_DEVELOPER_EDITION_SOURCE:      ${{ secrets.WO_DEVELOPER_EDITION_SOURCE }}
+      WO_ENTITLEMENT_KEY:               ${{ secrets.WO_ENTITLEMENT_KEY }}
+      WATSONX_APIKEY:                   ${{ secrets.WATSONX_APIKEY }}
+      WATSONX_SPACE_ID:                 ${{ secrets.WATSONX_SPACE_ID }}
+      WO_DEVELOPER_EDITION_SKIP_LOGIN:  ${{ secrets.WO_DEVELOPER_EDITION_SKIP_LOGIN }}
 
     steps:
       # 1. Check out repository
@@ -36,11 +36,11 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: "pip"
 
-      # 3. Install system packages needed for build (gcc, make, expect, etc.)
+      # 3. Install system packages needed for build (gcc, make, etc.)
       - name: Install system dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y --no-install-recommends build-essential expect
+          sudo apt-get install -y --no-install-recommends build-essential
 
       # 4. Bootstrap the virtual env & Python deps
       - name: Install Python dependencies
@@ -53,25 +53,12 @@ jobs:
           # agent‑tool deps
           if [ -f tools/requirements.txt ]; then pip install -r tools/requirements.txt; fi
 
-      # 5. Run the full pipeline (with the fix for the interactive prompt)
+      # 5. Run the full Makefile pipeline
       - name: Run make install ➜ start ➜ run
         run: |
           source .venv/bin/activate
           make install
           
-          # --- START THE SERVER (using expect to auto-accept license) ---
-          echo "🚀 Starting watsonx Orchestrate server..."
-          # The .env file is created by 'make install' in the root directory
-          /usr/bin/expect -c '
-          set timeout -1
-          spawn orchestrate server start --env-file=.env
-          expect "please enter \\"I accept\\":"
-          send "I accept\r"
-          expect eof
-          '
-          
-          make run
-
       # 6. OPTIONAL health‑check / test placeholder
       # - name: run make check      # TODO: create this target later
       #   run: |
