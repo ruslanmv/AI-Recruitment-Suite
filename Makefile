@@ -49,7 +49,7 @@ run:
 # Stops the watsonx Orchestrate server and related containers.
 stop:
 	@echo "🛑 Stopping the server and any related containers..."
-	@$(SHEE) $(STOP_SCRIPT)
+	@$(SHELL) $(STOP_SCRIPT)
 
 # Purges the environment by removing all containers and Docker images.
 purge:
