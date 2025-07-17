@@ -9,12 +9,13 @@ on:
 jobs:
   pipeline:
     runs-on: ubuntu-latest
+    environment: "Watsonx Orchestrate"       # ← makes your Environment secrets available here
     strategy:
       matrix:
         python-version: ["3.11"]
 
     # ──────────────────────────────────────────────────────────────────────────
-    # 👉 All repository secrets become env vars for every step below
+    # 👉 All repository & environment secrets become env vars for every step below
     # ──────────────────────────────────────────────────────────────────────────
     env:
       WO_DEVELOPER_EDITION_SOURCE:      ${{ secrets.WO_DEVELOPER_EDITION_SOURCE }}
