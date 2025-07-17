@@ -84,8 +84,8 @@ if ! command -v orchestrate &> /dev/null; then
     exit 1
 fi
 
-
 # --- START THE SERVER ---
 echo -e "${GREEN}🚀 Starting watsonx Orchestrate server...${NC}"
 echo -e "${YELLOW}   Using configuration from: ${ENV_FILE}${NC}"
-orchestrate server start --env-file="$ENV_FILE"
+# pipe the required acceptance into stdin so it never prompts
+printf "I accept\n" | orchestrate server start --env-file="$ENV_FILE"
