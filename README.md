@@ -177,10 +177,11 @@ open http://localhost:3000/chat-lite
 
 ```
 ai-recruitment-suite/
+├─ .github/workflows  # DevOps pipeline (CI/CD) 
 ├─ agents/            # .yaml agent specs (imported by make run)
 ├─ tools/             # Custom tool Python or OpenAPI files
 ├─ docker/            # Docker‑compose + service configs
-├─ watsonx-orchestrate/            # ⚙️ DevKit Installer scripts (included)
+├─ docs/              # Documentation 
 ├─ Makefile           # Command runner
 ├─ README.md
 └─ .env.example
