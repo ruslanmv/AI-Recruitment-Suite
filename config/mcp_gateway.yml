@@ -1,0 +1,77 @@
+# ==============================================================================
+# MCP Context Forge Gateway Configuration
+# AI Recruitment Suite - Production Configuration
+# Author: Ruslan Magana Vsevolodovna
+# Website: ruslanmv.com
+# License: Apache 2.0
+# ==============================================================================
+
+# Gateway Server Configuration
+server:
+  host: "0.0.0.0"
+  port: 4444
+  log_level: "info"
+
+# Security Configuration
+security:
+  jwt_secret_key: "${JWT_SECRET_KEY}"
+  basic_auth_enabled: true
+  basic_auth_password: "${BASIC_AUTH_PASSWORD}"
+
+# Admin API Configuration
+admin:
+  enabled: true
+  platform_admin_email: "${PLATFORM_ADMIN_EMAIL}"
+  platform_admin_password: "${PLATFORM_ADMIN_PASSWORD}"
+
+# UI Configuration
+ui:
+  enabled: true
+  title: "AI Recruitment Suite - MCP Gateway"
+  theme: "light"
+
+# Observability Configuration
+observability:
+  enabled: true
+  otel_endpoint: "${OTEL_EXPORTER_OTLP_ENDPOINT}"
+  traces_enabled: true
+  metrics_enabled: true
+  logs_enabled: true
+
+# Redis Configuration (for caching and federation)
+redis:
+  enabled: false
+  host: "${REDIS_HOST}"
+  port: 6379
+  db: 0
+
+# MCP Servers Registry
+servers:
+  - name: "watsonx-orchestrate"
+    url: "${WATSONX_ORCHESTRATE_URL}"
+    description: "WatsonX Orchestrate Integration"
+    enabled: true
+    auth:
+      type: "bearer"
+      token: "${WATSONX_API_KEY}"
+
+  - name: "recruitment-tools"
+    url: "http://localhost:8001/sse"
+    description: "Recruitment Database Tools"
+    enabled: true
+
+# Virtual Servers Configuration
+virtual_servers:
+  - name: "recruitment-suite"
+    description: "AI Recruitment & Tender Matching Tools"
+    associated_tools:
+      - "format_and_save_processed_data"
+      - "get_all_candidates"
+      - "get_all_bandos"
+      - "get_candidate_by_id"
+      - "get_comparison_data"
+      - "get_info_candidate"
+      - "get_info_bando"
+      - "save_evaluation_result"
+      - "get_evaluation_results"
+      - "clear_thread_files"
