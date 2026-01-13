@@ -466,10 +466,7 @@ make start
 ## 📞 Support & Contact
 
 **Author:** Ruslan Magana Vsevolodovna
-**Website:** [ruslanmv.com](https://ruslanmv.com)
-**Email:** ruslanmv@pm.me
-**GitHub:** [@ruslanmv](https://github.com/ruslanmv)
-**IBM Slack:** @ruslanmv
+
 
 For issues and feature requests, please use the [GitHub issue tracker](https://github.com/ruslanmv/ai-recruitment-suite/issues).
 
@@ -495,39 +492,7 @@ limitations under the License.
 
 See [LICENSE](LICENSE) for full details.
 
----
 
-## 🙏 Acknowledgments
-
-- **IBM watsonx Orchestrate Team** for the ADK framework
-- **IBM MCP Context Forge Team** for the gateway infrastructure
-- **Astral Team** for the uv package manager
-- **Meta** for Llama 3 models
-- **All open-source contributors** who made this possible
-
----
-
-## 🗺️ Roadmap
-
-### Version 1.1 (Q2 2025)
-- [ ] PostgreSQL support for enterprise deployments
-- [ ] Vector database integration (Weaviate/Pinecone)
-- [ ] Real-time collaboration features
-- [ ] Advanced analytics dashboard
-
-### Version 1.2 (Q3 2025)
-- [ ] Multi-language support (Spanish, Italian, French)
-- [ ] Mobile app (iOS/Android)
-- [ ] Slack/Teams integration
-- [ ] Custom scoring rubrics per organization
-
-### Version 2.0 (Q4 2025)
-- [ ] Multi-tenant SaaS platform
-- [ ] Marketplace for custom agents
-- [ ] GraphQL API
-- [ ] Advanced ML models for matching
-
----
 
 **Built with ❤️ for the future of intelligent recruitment**
 
